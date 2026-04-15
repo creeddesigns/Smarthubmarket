@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CreedMarket | Uganda's Smart Marketplace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f5f7fa; color: #1a1a2e; padding-bottom: 72px; }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.6; transform: scale(1); }
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #1a3a32 0%, #2d6a4f 25%, #e67e22 50%, #d35400 75%, #1a3a32 100%);
+            background-size: 300% 300%;
+            animation: gradientBG 8s ease infinite;
+            padding: 1.2rem 1rem 1.5rem;
+            border-radius: 0 0 2rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .brand-flex { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1rem; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .graphic-logo { background: rgba(255,255,245,0.2); backdrop-filter: blur(6px); width: 48px; height: 48px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: white; animation: pulse 3s ease infinite; }
+        .brand-text h1 { font-size: 1.6rem; color: white; font-weight: 800; }
+        .brand-text p { font-size: 0.65rem; color: #ffddb0; }
+        
+        .search-box { background: white; border-radius: 60px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+        .search-box input { flex: 1; border: none; outline: none; font-size: 0.9rem; background: transparent; }
+        .search-box i { color: #e67e22; }
+        
+        .cart-icon-header { background: #f4a261; padding: 8px 16px; border-radius: 40px; display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; }
+        
+        .categories-scroll { display: flex; gap: 10px; overflow-x: auto; margin-top: 12px; padding-bottom: 4px; }
+        .cat-chip { background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; color: white; cursor: pointer; white-space: nowrap; }
+        .cat-chip.active { background: #f4a261; color: #1e2a2a; }
+        
+        .container-main { max-width: 1300px; margin: 1.5rem auto; padding: 0 1rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
+        
+        .product-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        .product-img { height: 180px; background: #f9f5f0; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; font-size: 3rem; }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+        .product-info { padding: 0.8rem; }
+        .product-title { font-weight: 800; font-size: 0.95rem; }
+        .vendor-badge { font-size: 0.65rem; color: #e67e22; background: #fef2e8; display: inline-block; padding: 2px 8px; border-radius: 20px; margin: 5px 0; }
+        .price { font-size: 1.2rem; font-weight: 800; color: #1e6b4c; }
+        
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; display: flex; justify-content: space-around;
+            padding: 8px 12px 12px; border-top: 1px solid #e2e8f0;
+            z-index: 200;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; font-size: 0.65rem; color: #6c757d; cursor: pointer; position: relative; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: #e67e22; }
+        .notification-badge { position: absolute; top: -5px; right: -8px; background: #e74c3c; color: white; border-radius: 20px; padding: 2px 5px; font-size: 0.6rem; font-weight: bold; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-card { background: white; border-radius: 28px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 1.2rem; }
+        input, select, textarea { width: 100%; padding: 10px 14px; margin: 6px 0; border-radius: 40px; border: 1.5px solid #e2e8f0; }
+        button { background: #1a3a32; color: white; border: none; padding: 10px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 6px; }
+        .btn-airtel { background: #E60000; color: white; font-size: 1rem; padding: 12px; }
+        
+        /* Product Detail Modal - Gallery */
+        .product-detail-modal .modal-card { max-width: 550px; padding: 0; overflow: hidden; }
+        .gallery-container { position: relative; background: #000; }
+        .gallery-slide { display: none; width: 100%; height: 350px; object-fit: contain; background: #1a1a2e; }
+        .gallery-slide.active { display: block; }
+        .gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; z-index: 10; }
+        .gallery-prev { left: 10px; }
+        .gallery-next { right: 10px; }
+        .gallery-dots { display: flex; justify-content: center; gap: 8px; padding: 10px; background: #f1f5f9; }
+        .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; cursor: pointer; }
+        .gallery-dot.active { background: #e67e22; width: 20px; border-radius: 10px; }
+        .detail-info { padding: 1rem; }
+        .detail-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+        .detail-vendor { color: #e67e22; font-size: 0.8rem; margin-bottom: 8px; }
+        .detail-price { font-size: 1.5rem; font-weight: 800; color: #1e6b4c; margin: 10px 0; }
+        .detail-description { color: #475569; line-height: 1.5; margin: 12px 0; }
+        .detail-contact { display: flex; gap: 10px; margin: 15px 0; }
+        .detail-contact a { flex: 1; text-align: center; padding: 10px; border-radius: 40px; text-decoration: none; font-weight: 600; }
+        .btn-call { background: #f1f5f9; color: #2c5f4e; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-message { background: #e67e22; color: white; }
+        .btn-add-cart-detail { background: #1a3a32; color: white; margin-top: 10px; }
+        
+        .image-upload-area { border: 2px dashed #cbd5e1; border-radius: 20px; padding: 15px; text-align: center; margin: 10px 0; cursor: pointer; transition: 0.2s; }
+        .image-upload-area:hover { border-color: #e67e22; background: #fef3e8; }
+        .image-preview-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .preview-item { position: relative; width: 80px; height: 80px; border-radius: 16px; overflow: hidden; border: 2px solid #e67e22; }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-image { position: absolute; top: 2px; right: 2px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; }
+        
+        .chat-message { background: #f1f5f9; padding: 8px 12px; border-radius: 20px; margin: 6px 0; }
+        .chat-message.sent { background: #e67e22; color: white; text-align: right; }
+        .order-notification { background: #d1fae5; padding: 10px; border-radius: 16px; margin: 8px 0; border-left: 4px solid #10b981; }
+        .message-input-area { display: flex; gap: 8px; margin-top: 12px; }
+        .message-input-area input { flex: 1; margin: 0; }
+        .message-input-area button { width: auto; padding: 10px 16px; margin: 0; }
+        
+        footer { text-align: center; font-size: 0.7rem; color: #94a3b8; padding: 1rem; }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1a3a32; color: white; padding: 8px 20px; border-radius: 40px; z-index: 1100; font-size: 0.8rem; }
+        .airtel-highlight { background: #E60000; color: white; padding: 12px; border-radius: 60px; text-align: center; font-weight: bold; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="brand-flex">
+        <div class="logo-area">
+            <div class="graphic-logo"><i class="fas fa-chart-line"></i></div>
+            <div class="brand-text"><h1>CreedMarket</h1><p><i class="fas fa-map-marker-alt"></i> Uganda • Airtel Money Only</p></div>
+        </div>
+        <div class="cart-icon-header" id="cartIconBtn"><i class="fas fa-shopping-bag"></i> <span id="cartCount">0</span></div>
+    </div>
+    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search products, vendors..."></div>
+    <div class="categories-scroll" id="categoryList">
+        <div class="cat-chip active" data-cat="all">✨ All</div>
+        <div class="cat-chip" data-cat="Fresh Foods">🥑 Fresh Foods</div>
+        <div class="cat-chip" data-cat="Electronics">📱 Electronics</div>
+        <div class="cat-chip" data-cat="Fashion">👗 Fashion</div>
+        <div class="cat-chip" data-cat="Home & Living">🏠 Home</div>
+    </div>
+</div>
+
+<div class="container-main"><div id="productsGrid" class="products-grid"></div></div>
+<footer>🇺🇬 CreedMarket — Airtel Money payments only • Call/WhatsApp 0709298041</footer>
+
+<div class="bottom-nav">
+    <button class="nav-item active" data-nav="home"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" id="sellNavBtn"><i class="fas fa-plus-circle"></i><span>Sell</span></button>
+    <button class="nav-item" id="vendorNavBtn"><i class="fas fa-store"></i><span>Vendor</span></button>
+    <button class="nav-item" id="profileNavBtn"><i class="fas fa-user"></i><span>Profile</span><span id="profileNotificationBadge" class="notification-badge" style="display:none;">0</span></button>
+    <button class="nav-item" id="adminSecretTrigger"><i class="fas fa-user-cog"></i><span>Admin</span></button>
+</div>
+
+<!-- Product Detail Modal with Gallery -->
+<div id="productDetailModal" class="modal product-detail-modal">
+    <div class="modal-card">
+        <span id="closeDetailModal" style="position:absolute; right:15px; top:10px; font-size:1.8rem; cursor:pointer; z-index:20; color:white; background:rgba(0,0,0,0.5); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center;">&times;</span>
+        <div id="detailGalleryContainer"></div>
+        <div class="detail-info" id="detailInfo"></div>
+    </div>
+</div>
+
+<!-- Cart Modal -->
+<div id="cartModal" class="modal"><div class="modal-card"><span id="closeCart" style="float:right; font-size:1.5rem; cursor:pointer;">&times;</span><h3><i class="fas fa-bag-shopping"></i> Cart</h3><div id="cartItemsList"></div><div id="cartTotal" style="font-weight:bold; margin:1rem 0;"></div><button id="checkoutOrderBtn">Place Order</button><div id="orderFeedback"></div></div></div>
+
+<!-- Registration Modal - Airtel Only -->
+<div id="registerModal" class="modal"><div class="modal-card"><span id="closeReg" style="float:right; font-size:1.5rem; cursor:pointer;">&times;</span><h3><i class="fas fa-handshake"></i> Become a seller</h3><div class="airtel-highlight"><i class="fas fa-mobile-alt"></i> Pay 5,000 UGX via Airtel Money<br><strong style="font-size: 1.3rem;">0709298041</strong></div><button id="payAirtelBtn" class="btn-airtel"><i class="fas fa-circle"></i> Pay with Airtel Money (5,000 UGX)</button><div style="text-align:center; margin:10px;">— After payment, complete form —</div><input type="text" id="regBusiness" placeholder="Business name"><input type="tel" id="regPhoneNum" placeholder="Your phone number"><input type="text" id="regTxnRef" placeholder="Airtel transaction reference"><button id="submitRegReq">Request approval</button><div id="regMsg"></div></div></div>
+
+<!-- Vendor Dashboard -->
+<div id="vendorModal" class="modal"><div class="modal-card"><span id="closeVendor" style="float:right; font-size:1.5rem; cursor:pointer;">&times;</span><h3><i class="fas fa-chart-line"></i> Vendor panel</h3><div id="vendorLoginDiv"><input type="tel" id="vendorLoginPhone" placeholder="Phone number"><button id="doVendorLogin">Login</button></div><div id="vendorDashboardPanel" style="display:none;"><h4>Add product</h4><input type="text" id="prodName" placeholder="Product name"><input type="number" id="prodPrice" placeholder="Price (UGX)"><select id="prodCategory"><option>Fresh Foods</option><option>Electronics</option><option>Fashion</option><option>Home & Living</option></select><textarea id="prodDesc" rows="2" placeholder="Description"></textarea><div class="image-upload-area" id="imageUploadArea"><i class="fas fa-camera" style="font-size:1.5rem; color:#e67e22;"></i><p>Tap to select product image</p><input type="file" id="productImageInput" accept="image/*" style="display:none;"></div><div id="imagePreviewContainer" class="image-preview-grid"></div><button id="publishProductBtn">Publish Product</button><hr><h4>Your products</h4><div id="vendorProductsList"></div></div></div></div>
+
+<!-- Profile Modal -->
+<div id="profileModal" class="modal"><div class="modal-card"><span id="closeProfile" style="float:right; font-size:1.5rem; cursor:pointer;">&times;</span><h3><i class="fas fa-user-circle"></i> My Profile</h3><div id="profileLoginArea"><input type="tel" id="profilePhoneInput" placeholder="Enter your phone number"><button id="profileLoginBtn">Login to Profile</button></div><div id="profileContent" style="display:none;"><div id="profileInfo"></div><div style="margin-top:1rem;"><h4><i class="fas fa-bell"></i> Notifications <span id="notificationCount" style="background:#e74c3c; color:white; padding:2px 8px; border-radius:20px; font-size:0.7rem;">0</span></h4><div id="notificationsList"></div></div><div style="margin-top:1rem;"><h4><i class="fas fa-comments"></i> Messages</h4><div id="conversationsList"></div><div id="chatArea" style="display:none;"><div id="chatWith"></div><div id="chatMessages"></div><div class="message-input-area"><input type="text" id="chatMessageInput" placeholder="Type a message..."><button id="sendMessageBtn">Send</button></div></div></div></div></div></div>
+
+<!-- Admin Panel -->
+<div id="adminModal" class="modal"><div class="modal-card"><span id="closeAdmin" style="float:right; font-size:1.5rem; cursor:pointer;">&times;</span><h3><i class="fas fa-shield-alt"></i> Admin</h3><input type="password" id="adminPass" placeholder="Password"><button id="adminLoginBtn">Unlock</button><div id="adminContent" style="display:none;"><h4>Pending sellers</h4><div id="pendingList"></div><h4>Approved vendors</h4><div id="approvedList"></div><button id="resetDataBtn" style="background:#c0392b;">Reset all</button></div></div></div>
+
+<script>
+    let approvedVendors = JSON.parse(localStorage.getItem('CM_approved')) || [];
+    let pendingVendors = JSON.parse(localStorage.getItem('CM_pending')) || [];
+    let allProducts = JSON.parse(localStorage.getItem('CM_products')) || [];
+    let shoppingCart = JSON.parse(localStorage.getItem('CM_cart')) || [];
+    let orders = JSON.parse(localStorage.getItem('CM_orders')) || [];
+    let messages = JSON.parse(localStorage.getItem('CM_messages')) || [];
+    let notifications = JSON.parse(localStorage.getItem('CM_notifications')) || [];
+    
+    const ADMIN_PASSWORD = "creed2561";
+    const AIRTEL_NUMBER = "0709298041";
+    let currentUserId = null;
+    let currentChatWith = null;
+    let currentProductImage = null;
+    
+    function saveAll() {
+        localStorage.setItem('CM_approved', JSON.stringify(approvedVendors));
+        localStorage.setItem('CM_pending', JSON.stringify(pendingVendors));
+        localStorage.setItem('CM_products', JSON.stringify(allProducts));
+        localStorage.setItem('CM_cart', JSON.stringify(shoppingCart));
+        localStorage.setItem('CM_orders', JSON.stringify(orders));
+        localStorage.setItem('CM_messages', JSON.stringify(messages));
+        localStorage.setItem('CM_notifications', JSON.stringify(notifications));
+    }
+    
+    function showToast(msg) { let t = document.createElement('div'); t.className = 'toast'; t.innerText = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
+    function updateCartUI() { let total = shoppingCart.reduce((s, i) => s + i.qty, 0); document.getElementById('cartCount').innerText = total; }
+    function openAirtelPayment() { window.location.href = `tel:*185*${AIRTEL_NUMBER}*5000#`; showToast("Opening Airtel Money USSD. Complete payment of 5,000 UGX"); }
+    
+    // Image upload
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.getElementById('productImageInput');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    if (imageUploadArea) imageUploadArea.addEventListener('click', () => imageInput?.click());
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentProductImage = event.target.result;
+                    if (imagePreviewContainer) imagePreviewContainer.innerHTML = `<div class="preview-item"><img src="${currentProductImage}"><span class="remove-image" onclick="removeImage()">✖</span></div>`;
+                    showToast("Image selected!");
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    window.removeImage = function() { currentProductImage = null; if(imagePreviewContainer) imagePreviewContainer.innerHTML = ''; if(imageInput) imageInput.value = ''; showToast("Image removed"); };
+    
+    // Product Detail Modal with Gallery
+    function openProductDetail(product) {
+        let images = product.images && product.images.length ? product.images : (product.image ? [product.image] : []);
+        if (images.length === 0) images = [null];
+        
+        let galleryHtml = `<div class="gallery-container" style="position:relative; background:#1a1a2e; min-height:350px;">
+            <div class="gallery-slides" id="gallerySlides">`;
+        images.forEach((img, idx) => {
+            galleryHtml += `<img class="gallery-slide ${idx === 0 ? 'active' : ''}" src="${img || ''}" style="${!img ? 'display:flex; align-items:center; justify-content:center; font-size:4rem;' : ''}" ${!img ? 'alt="📦"' : ''}>`;
+            if (!img) galleryHtml = galleryHtml.replace('src=""', 'style="display:flex; align-items:center; justify-content:center; font-size:4rem;"').replace('alt=""', 'alt="📦"');
+        });
+        galleryHtml += `</div>
+            <button class="gallery-nav gallery-prev" onclick="changeSlide(-1)">❮</button>
+            <button class="gallery-nav gallery-next" onclick="changeSlide(1)">❯</button>
+            <div class="gallery-dots" id="galleryDots">`;
+        images.forEach((_, idx) => { galleryHtml += `<div class="gallery-dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})"></div>`; });
+        galleryHtml += `</div></div>`;
+        
+        let cleanPhone = product.vendorPhone?.replace(/\s/g, '');
+        if (cleanPhone?.startsWith('0')) cleanPhone = '256' + cleanPhone.substring(1);
+        
+        let infoHtml = `
+            <div class="detail-title">${escapeHtml(product.name)}</div>
+            <div class="detail-vendor"><i class="fas fa-store"></i> ${escapeHtml(product.vendorName)}</div>
+            <div class="detail-price">UGX ${product.price.toLocaleString()}</div>
+            <div class="detail-description">${escapeHtml(product.description || 'No description provided')}</div>
+            <div class="detail-contact">
+                <a href="tel:${cleanPhone}" class="btn-call"><i class="fas fa-phone"></i> Call</a>
+                <a href="https://wa.me/${cleanPhone}" class="btn-wa"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <button onclick="startChatFromDetail('${product.vendorPhone}')" class="btn-message"><i class="fas fa-comment"></i> Message</button>
+            </div>
+            <button class="btn-add-cart-detail" onclick="addToCartFromDetail(${product.id})"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+        `;
+        
+        document.getElementById('detailGalleryContainer').innerHTML = galleryHtml;
+        document.getElementById('detailInfo').innerHTML = infoHtml;
+        document.getElementById('productDetailModal').style.display = 'flex';
+        
+        window.currentSlideIndex = 0;
+        window.totalSlides = images.length;
+    }
+    
+    window.changeSlide = function(direction) {
+        let newIndex = window.currentSlideIndex + direction;
+        if (newIndex < 0) newIndex = window.totalSlides - 1;
+        if (newIndex >= window.totalSlides) newIndex = 0;
+        goToSlide(newIndex);
+    };
+    
+    window.goToSlide = function(index) {
+        let slides = document.querySelectorAll('.gallery-slide');
+        let dots = document.querySelectorAll('.gallery-dot');
+        if (!slides.length) return;
+        slides.forEach((s, i) => s.classList.toggle('active', i === index));
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        window.currentSlideIndex = index;
+    };
+    
+    window.startChatFromDetail = (vendorPhone) => {
+        document.getElementById('productDetailModal').style.display = 'none';
+        if (!currentUserId) {
+            alert("Please login to your profile first (click Profile and enter your phone number)");
+            document.getElementById('profileModal').style.display = 'flex';
+            return;
+        }
+        document.getElementById('profileModal').style.display = 'flex';
+        loadChat(vendorPhone);
+    };
+    
+    window.addToCartFromDetail = (productId) => {
+        let prod = allProducts.find(x => x.id === productId);
+        if (prod) {
+            let existing = shoppingCart.find(i => i.id === productId);
+            if (existing) existing.qty++;
+            else shoppingCart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
+            saveAll();
+            updateCartUI();
+            showToast(`✓ ${prod.name} added to cart`);
+            document.getElementById('productDetailModal').style.display = 'none';
+        }
+    };
+    
+    function placeOrder() {
+        if (shoppingCart.length === 0) { alert("Cart empty"); return; }
+        let orderId = Date.now();
+        let orderItems = [...shoppingCart];
+        orderItems.forEach(item => {
+            let product = allProducts.find(p => p.id === item.id);
+            if (product && product.vendorPhone) {
+                notifications.push({ id: Date.now() + Math.random(), userId: product.vendorPhone, type: 'order', title: 'New Order!', message: `${currentUserId || 'Someone'} ordered ${item.name} x${item.qty} for UGX ${(item.price * item.qty).toLocaleString()}`, timestamp: new Date().toISOString(), read: false, orderId: orderId });
+            }
+        });
+        orders.push({ id: orderId, items: orderItems, total: orderItems.reduce((s, i) => s + (i.price * i.qty), 0), customer: currentUserId || 'Guest', date: new Date().toISOString() });
+        shoppingCart = [];
+        saveAll();
+        updateCartUI();
+        document.getElementById('orderFeedback').innerHTML = "<div style='background:#d1fae5; padding:12px; border-radius:20px;'>✅ Order placed! Vendors will receive notifications.</div>";
+        setTimeout(() => { document.getElementById('cartModal').style.display = 'none'; renderMarketplace(); }, 1500);
+        showToast("Order placed! Vendors notified.");
+        updateProfileNotifications();
+    }
+    
+    function sendMessage(toPhone, text) {
+        if (!text.trim() || !currentUserId) return;
+        messages.push({ id: Date.now(), from: currentUserId, to: toPhone, text: text, timestamp: new Date().toISOString(), read: false });
+        notifications.push({ id: Date.now(), userId: toPhone, type: 'message', title: 'New message', message: `${currentUserId} sent: ${text.substring(0, 50)}`, timestamp: new Date().toISOString(), read: false });
+        saveAll();
+        showToast("Message sent");
+        loadChat(toPhone);
+        updateProfileNotifications();
+    }
+    
+    function loadChat(withPhone) {
+        if (!currentUserId) return;
+        currentChatWith = withPhone;
+        let chatMessages = messages.filter(m => (m.from === currentUserId && m.to === withPhone) || (m.from === withPhone && m.to === currentUserId));
+        chatMessages.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        document.getElementById('chatMessages').innerHTML = chatMessages.map(m => `<div class="chat-message ${m.from === currentUserId ? 'sent' : ''}"><strong>${m.from === currentUserId ? 'Me' : m.from}:</strong> ${m.text}<br><small>${new Date(m.timestamp).toLocaleTimeString()}</small></div>`).join('');
+        document.getElementById('chatArea').style.display = 'block';
+        document.getElementById('chatWith').innerHTML = `<strong><i class="fas fa-comment"></i> Chat with ${withPhone}</strong>`;
+    }
+    
+    function loadProfile() {
+        if (!currentUserId) return;
+        let vendor = approvedVendors.find(v => v.phone === currentUserId);
+        document.getElementById('profileInfo').innerHTML = `<div style="text-align:center;"><i class="fas fa-user-circle" style="font-size:3rem; color:#e67e22;"></i><h3>${vendor ? vendor.name : 'Customer'}</h3><p>📞 ${currentUserId}</p><p>${vendor ? '✅ Verified Seller' : '👤 Buyer Account'}</p></div>`;
+        updateProfileNotifications();
+        loadConversations();
+    }
+    
+    function updateProfileNotifications() {
+        let userNotifs = notifications.filter(n => n.userId === currentUserId && !n.read);
+        let badge = document.getElementById('profileNotificationBadge');
+        let countSpan = document.getElementById('notificationCount');
+        if (userNotifs.length > 0) { badge.style.display = 'flex'; badge.innerText = userNotifs.length; if(countSpan) countSpan.innerText = userNotifs.length; }
+        else { badge.style.display = 'none'; if(countSpan) countSpan.innerText = '0'; }
+        let notifContainer = document.getElementById('notificationsList');
+        if (notifContainer && currentUserId) {
+            let allUserNotifs = notifications.filter(n => n.userId === currentUserId).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            notifContainer.innerHTML = allUserNotifs.map(n => `<div class="order-notification" style="${n.read ? 'opacity:0.7;' : 'background:#fef3c7;'}"><strong>${n.title}</strong><br><small>${n.message}</small><br><span style="font-size:0.6rem;">${new Date(n.timestamp).toLocaleString()}</span><button onclick="markNotificationRead('${n.id}')" style="background:#e67e22; padding:4px 8px; font-size:0.7rem; width:auto; margin-top:5px;">Mark read</button></div>`).join('');
+            if (allUserNotifs.length === 0) notifContainer.innerHTML = "<p>No notifications</p>";
+        }
+    }
+    
+    window.markNotificationRead = (id) => { let notif = notifications.find(n => n.id == id); if(notif) notif.read = true; saveAll(); updateProfileNotifications(); };
+    
+    function loadConversations() {
+        let involvedPhones = [...new Set(messages.filter(m => m.from === currentUserId || m.to === currentUserId).map(m => m.from === currentUserId ? m.to : m.from))];
+        let container = document.getElementById('conversationsList');
+        if (involvedPhones.length === 0) { container.innerHTML = "<p>No conversations yet.</p>"; return; }
+        container.innerHTML = involvedPhones.map(phone => `<div style="background:#f1f5f9; padding:10px; border-radius:20px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><i class="fas fa-user"></i> ${phone}</div><button onclick="loadChat('${phone}')" style="background:#e67e22; width:auto; padding:6px 12px;">Chat</button></div>`).join('');
+    }
+    
+    function getContactHtml(phone) {
+        let p = phone.replace(/\s/g, ''); if(p.startsWith('0')) p = '256' + p.substring(1);
+        return `<div style="display:flex; gap:6px; margin-top:6px;"><a href="tel:${p}" style="background:#f1f5f9; padding:4px 10px; border-radius:30px; font-size:0.7rem; text-decoration:none; color:#2c5f4e;"><i class="fas fa-phone"></i> Call</a><a href="https://wa.me/${p}" style="background:#25D366; padding:4px 10px; border-radius:30px; font-size:0.7rem; text-decoration:none; color:white;"><i class="fab fa-whatsapp"></i> WhatsApp</a>${currentUserId ? `<button onclick="startChat('${phone}')" style="background:#e67e22; padding:4px 10px; border-radius:30px; font-size:0.7rem; width:auto;">Message</button>` : ''}</div>`;
+    }
+    
+    window.startChat = (vendorPhone) => {
+        if (!currentUserId) { alert("Please login to your profile first"); document.getElementById('profileModal').style.display = 'flex'; return; }
+        document.getElementById('profileModal').style.display = 'flex';
+        loadChat(vendorPhone);
+    };
+    
+    function renderMarketplace() {
+        let searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || "";
+        let activeCat = document.querySelector('.cat-chip.active')?.dataset.cat || "all";
+        let filtered = allProducts.filter(p => (activeCat === "all" || p.category === activeCat) && (p.name.toLowerCase().includes(searchTerm) || p.vendorName.toLowerCase().includes(searchTerm)));
+        let grid = document.getElementById('productsGrid');
+        if (filtered.length === 0) { grid.innerHTML = `<div style="text-align:center; padding:2rem;">No products found</div>`; return; }
+        grid.innerHTML = filtered.map(p => {
+            let imgHtml = p.image ? `<div class="product-img"><img src="${p.image}" alt="${p.name}"></div>` : `<div class="product-img">📦</div>`;
+            return `<div class="product-card" onclick="openProductDetail(${JSON.stringify(p).replace(/</g, '\\u003c')})">
+                ${imgHtml}
+                <div class="product-info">
+                    <div class="product-title">${escapeHtml(p.name)}</div>
+                    <div class="vendor-badge"><i class="fas fa-store"></i> ${escapeHtml(p.vendorName)}</div>
+                    <div class="price">UGX ${p.price.toLocaleString()}</div>
+                    ${getContactHtml(p.vendorPhone)}
+                    <button class="btn-cart add-to-cart" data-id="${p.id}" onclick="event.stopPropagation(); addToCartFromDetail(${p.id})"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    
+    function addToCartFromDetail(productId) {
+        let prod = allProducts.find(x => x.id === productId);
+        if (prod) {
+            let existing = shoppingCart.find(i => i.id === productId);
+            if (existing) existing.qty++;
+            else shoppingCart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
+            saveAll();
+            updateCartUI();
+            showToast(`✓ ${prod.name} added`);
+        }
+    }
+    
+    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]) || ''; }
+    
+    document.querySelectorAll('.cat-chip').forEach(chip => {
+        chip.addEventListener('click', () => { document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); renderMarketplace(); });
+    });
+    document.getElementById('searchInput')?.addEventListener('input', renderMarketplace);
+    
+    // Cart
+    const cartModal = document.getElementById('cartModal');
+    document.getElementById('cartIconBtn').onclick = () => {
+        let itemsHtml = '', total = 0;
+        shoppingCart.forEach((item, idx) => { let sum = item.price * item.qty; total += sum; itemsHtml += `<div style="display:flex; justify-content:space-between; padding:6px 0;"><div><strong>${item.name}</strong> x${item.qty}</div><div>UGX ${sum.toLocaleString()} <button onclick="removeCartItem(${idx})" style="background:#e74c3c; width:auto; padding:2px 8px;">✖</button></div></div>`; });
+        document.getElementById('cartItemsList').innerHTML = itemsHtml || "<p>Empty</p>";
+        document.getElementById('cartTotal').innerHTML = `Total: UGX ${total.toLocaleString()}`;
+        cartModal.style.display = 'flex';
+    };
+    window.removeCartItem = (idx) => { shoppingCart.splice(idx, 1); saveAll(); updateCartUI(); document.getElementById('cartIconBtn').click(); renderMarketplace(); };
+    document.getElementById('closeCart').onclick = () => cartModal.style.display = 'none';
+    document.getElementById('checkoutOrderBtn').onclick = placeOrder;
+    
+    // Registration
+    const regModal = document.getElementById('registerModal');
+    document.getElementById('sellNavBtn').onclick = () => regModal.style.display = 'flex';
+    document.getElementById('closeReg').onclick = () => regModal.style.display = 'none';
+    document.getElementById('payAirtelBtn').onclick = () => openAirtelPayment();
+    document.getElementById('submitRegReq').onclick = () => {
+        let name = document.getElementById('regBusiness').value.trim(), phone = document.getElementById('regPhoneNum').value.trim(), txn = document.getElementById('regTxnRef').value.trim();
+        if (!name || !phone || !txn) { alert("Fill all fields"); return; }
+        if (approvedVendors.find(v => v.phone === phone)) { alert("Already approved"); return; }
+        if (pendingVendors.find(v => v.phone === phone)) { alert("Pending already"); return; }
+        pendingVendors.push({ name, phone, transactionId: txn });
+        saveAll();
+        document.getElementById('regMsg').innerHTML = "<span style='color:green;'>✓ Request sent. Admin will verify Airtel payment.</span>";
+        setTimeout(() => regModal.style.display = 'none', 1500);
+    };
+    
+    // Vendor Dashboard
+    const vendorModal = document.getElementById('vendorModal');
+    document.getElementById('vendorNavBtn').onclick = () => vendorModal.style.display = 'flex';
+    document.getElementById('closeVendor').onclick = () => vendorModal.style.display = 'none';
+    let currentVendor = null;
+    document.getElementById('doVendorLogin').onclick = () => {
+        let phone = document.getElementById('vendorLoginPhone').value.trim();
+        let vendor = approvedVendors.find(v => v.phone === phone);
+        if (vendor) { currentVendor = phone; document.getElementById('vendorLoginDiv').style.display = 'none'; document.getElementById('vendorDashboardPanel').style.display = 'block'; loadVendorProducts(); }
+        else alert("Not approved yet. Pay 5,000 UGX via Airtel to 0709298041");
+    };
+    function loadVendorProducts() {
+        let myProducts = allProducts.filter(p => p.vendorPhone === currentVendor);
+        let container = document.getElementById('vendorProductsList');
+        container.innerHTML = myProducts.map(p => `<div style="background:#f8fafc; padding:8px; border-radius:16px; margin-bottom:6px;"><strong>${p.name}</strong> - UGX ${p.price}<br><button onclick="deleteProduct(${p.id})" style="background:#e76f51;">Delete</button></div>`).join('');
+        if (myProducts.length === 0) container.innerHTML = "<p>No products yet.</p>";
+    }
+    window.deleteProduct = (id) => { allProducts = allProducts.filter(p => p.id !== id); saveAll(); loadVendorProducts(); renderMarketplace(); showToast("Deleted"); };
+    document.getElementById('publishProductBtn').onclick = () => {
+        if (!currentVendor) { alert("Login first"); return; }
+        let name = document.getElementById('prodName').value.trim(), price = parseInt(document.getElementById('prodPrice').value), category = document.getElementById('prodCategory').value, desc = document.getElementById('prodDesc').value.trim();
+        if (!name || isNaN(price)) { alert("Valid name & price"); return; }
+        let vendorInfo = approvedVendors.find(v => v.phone === currentVendor);
+        allProducts.push({ id: Date.now(), name, price, category, description: desc, image: currentProductImage, images: currentProductImage ? [currentProductImage] : [], vendorPhone: currentVendor, vendorName: vendorInfo.name });
+        saveAll();
+        renderMarketplace();
+        loadVendorProducts();
+        document.getElementById('prodName').value = ''; document.getElementById('prodPrice').value = ''; document.getElementById('prodDesc').value = '';
+        currentProductImage = null; if(imagePreviewContainer) imagePreviewContainer.innerHTML = ''; if(imageInput) imageInput.value = '';
+        showToast("Product published!");
+    };
+    
+    // Profile
+    const profileModal = document.getElementById('profileModal');
+    document.getElementById('profileNavBtn').onclick = () => profileModal.style.display = 'flex';
+    document.getElementById('closeProfile').onclick = () => profileModal.style.display = 'none';
+    document.getElementById('profileLoginBtn').onclick = () => {
+        let phone = document.getElementById('profilePhoneInput').value.trim();
+        if (!phone) { alert("Enter phone number"); return; }
+        currentUserId = phone;
+        document.getElementById('profileLoginArea').style.display = 'none';
+        document.getElementById('profileContent').style.display = 'block';
+        loadProfile();
+    };
+    document.getElementById('sendMessageBtn').onclick = () => { let msg = document.getElementById('chatMessageInput').value; if (currentChatWith && msg) { sendMessage(currentChatWith, msg); document.getElementById('chatMessageInput').value = ''; } };
+    
+    // Admin
+    const adminModal = document.getElementById('adminModal');
+    document.getElementById('adminSecretTrigger').onclick = () => adminModal.style.display = 'flex';
+    document.getElementById('closeAdmin').onclick = () => adminModal.style.display = 'none';
+    document.getElementById('adminLoginBtn').onclick = () => {
+        if (document.getElementById('adminPass').value === ADMIN_PASSWORD) { document.getElementById('adminContent').style.display = 'block'; loadAdminDashboard(); }
+        else alert("Wrong password");
+    };
+    function loadAdminDashboard() {
+        document.getElementById('pendingList').innerHTML = pendingVendors.map((v, idx) => `<div style="margin:8px 0; padding:8px; background:#fef3c7; border-radius:16px;"><strong>${v.name}</strong> | ${v.phone}<br>Airtel Ref: ${v.transactionId}<br><button onclick="approveVendor(${idx})">✅ Approve</button></div>`).join('');
+        document.getElementById('approvedList').innerHTML = approvedVendors.map(v => `<div>✅ ${v.name} - ${v.phone}</div>`).join('');
+        document.getElementById('resetDataBtn').onclick = () => { if(confirm("Reset all?")) { localStorage.clear(); location.reload(); } };
+    }
+    window.approveVendor = (idx) => { let vendor = pendingVendors[idx]; approvedVendors.push({ name: vendor.name, phone: vendor.phone }); pendingVendors.splice(idx, 1); saveAll(); loadAdminDashboard(); renderMarketplace(); showToast(`✅ ${vendor.name} approved!`); };
+    
+    // Close detail modal
+    document.getElementById('closeDetailModal').onclick = () => document.getElementById('productDetailModal').style.display = 'none';
+    window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    
+    renderMarketplace();
+    updateCartUI();
+</script>
+</body>
+                                                                                                                                                                                                                                     </html>
